@@ -103,6 +103,15 @@ def preprocess_data():
     plt.title('Steering Angle Distribution')
     plt.show()
     
+    images, steering_angles = balance_steering_angles(images, steering_angles)
+
+    plt.figure(figsize=(10, 6))
+    plt.hist(steering_angles, bins=30)
+    plt.xlabel('Steering Angle')
+    plt.ylabel('Frequency')
+    plt.title('Steering Angle Distribution')
+    plt.show()
+
     processed_images = []
     valid_steering_angles = []
     
