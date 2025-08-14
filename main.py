@@ -36,6 +36,13 @@ def augment_image(image, steering_angle):
         center = (w // 2, h // 2)
         M = cv2.getRotationMatrix2D(center, angle, 1.0)
         augmented_image = cv2.warpAffine(augmented_image, M, (w, h))
+    
+    if random.random() > 0.5:
+        tx = random.uniform(-50, 50)  
+        h, w = augmented_image.shape[:2]
+        augmented_angle += tx * 0.002  #adjust steering slightly
+        M = np.float32([[1, 0, tx], [0, 1, 0]])
+        augmented_image = cv2.warpAffine(augmented_image, M, (w, h))
 
     return augmented_image, augmented_angle
 
