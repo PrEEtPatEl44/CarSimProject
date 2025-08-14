@@ -7,6 +7,38 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, Flatten, Dense
 from tensorflow.keras.optimizers import Adam
+import random
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+#####################################################
+#####################################################
+#####################################################
+
+
+
+def augment_image(image, steering_angle):
+
+    augmented_image = image.copy()
+    augmented_angle = steering_angle
+
+    if random.random() > 0.5:
+        augmented_image = cv2.flip(augmented_image, 1)
+        augmented_angle = -steering_angle
+
+    if random.random() > 0.5:
+        brightness_factor = random.uniform(0.7, 1.3)
+        augmented_image = np.clip(augmented_image * brightness_factor, 0, 1)
+
+
+    if random.random() > 0.5:
+        angle = random.uniform(-10, 10)
+        h, w = augmented_image.shape[:2]
+        center = (w // 2, h // 2)
+        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        augmented_image = cv2.warpAffine(augmented_image, M, (w, h))
+
+    return augmented_image, augmented_angle
+
 
 
 #####################################################
@@ -44,12 +76,12 @@ def preprocess_data():
                 img = cv2.resize(img, (200, 66))
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
                 img = cv2.GaussianBlur(img, (3, 3), 0)
-                img = img / 255.0
-                processed_image = img
-
-        if processed_image is not None:
-            processed_images.append(processed_image)
-            valid_steering_angles.append(steering_angles[i])
+                img = img / 255
+                # processed_img = img
+                augmented_img, augmented_angle = augment_image(img, steering_angles[i])
+                # if img is not None:
+                processed_images.append(augmented_img)
+                valid_steering_angles.append(augmented_angle)
         else:
             print(f"processed image is None for {img_path}")
 
@@ -87,9 +119,12 @@ def model_training(X_train, X_test, y_train, y_test):
         Dense(1)
     ])
     
+
     model.compile(optimizer=Adam(learning_rate=0.0001), loss='mse')
-    history = model.fit( X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=32)
-    model.save('model.h5')
+    history = model.fit(X_train, y_train,
+                        validation_data=(X_test, y_test),
+                        epochs=10)
+    model.save('modelv6.h5')
 
 
     plt.figure(figsize=(6, 4))
