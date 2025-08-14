@@ -14,6 +14,42 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 #####################################################
 #####################################################
 
+def balance_steering_angles(images, steering_angles):
+    straight_threshold = 0.05 
+    straight_keep_ratio = 0.2  # only 20% straights
+    
+    images = np.array(images)
+    steering_angles = np.array(steering_angles)
+
+    total_size = len(images)
+    straight_indices = []
+    turning_indices = []
+
+    for i, angle in enumerate(steering_angles):
+        if abs(angle) <= straight_threshold:
+            straight_indices.append(i)
+        else:
+            turning_indices.append(i)
+
+    keep_straight = np.random.choice(
+        straight_indices,
+        size=int(len(straight_indices) * straight_keep_ratio),
+        replace=False
+    )
+
+    reduced_set = np.concatenate([keep_straight, turning_indices])
+
+    if len(reduced_set) < total_size:
+        extra_needed = total_size - len(reduced_set)
+        extra_indices = np.random.choice(reduced_set, size=extra_needed, replace=True)
+        final_indices = np.concatenate([reduced_set, extra_indices])
+    else:
+        final_indices = reduced_set
+
+    np.random.shuffle(final_indices)
+    return images[final_indices], steering_angles[final_indices]
+
+
 
 
 def augment_image(image, steering_angle):
