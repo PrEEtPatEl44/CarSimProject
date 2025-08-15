@@ -210,7 +210,7 @@ def model_training(X_train, X_test, y_train, y_test, batch_size=32):
         validation_data=(X_test, y_test),
         epochs=10
     )
-    model.save('modelv16.h5')
+    model.save('./models/modelv16.h5')
 
 
     plt.figure(figsize=(6, 4))
