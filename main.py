@@ -50,7 +50,9 @@ def balance_steering_angles(images, steering_angles):
     return images[final_indices], steering_angles[final_indices]
 
 
-
+#####################################################
+#####################################################
+#####################################################
 
 def augment_image(image, steering_angle):
 
@@ -81,6 +83,30 @@ def augment_image(image, steering_angle):
         augmented_image = cv2.warpAffine(augmented_image, M, (w, h))
 
     return augmented_image, augmented_angle
+
+#####################################################
+#####################################################
+#####################################################
+
+# https://medium.com/analytics-vidhya/train-keras-model-with-large-dataset-batch-training-6b3099fdf366
+def batch_generator(X, y, batch_size=32):
+    num_samples = len(X)
+    while True: 
+        indices = np.arange(num_samples)
+        np.random.shuffle(indices)
+        
+        for offset in range(0, num_samples, batch_size):
+            batch_indices = indices[offset:offset+batch_size]
+            batch_images = []
+            batch_angles = []
+            for idx in batch_indices:
+                img = X[idx]
+                angle = y[idx]
+                if np.random.rand() < 0.5:
+                    img, angle = augment_image(img, angle)
+                batch_images.append(img)
+                batch_angles.append(angle)
+            yield np.array(batch_images), np.array(batch_angles)
 
 
 
@@ -173,10 +199,20 @@ def model_training(X_train, X_test, y_train, y_test):
     
 
     model.compile(optimizer=Adam(learning_rate=0.0001), loss='mse')
-    history = model.fit(X_train, y_train,
-                        validation_data=(X_test, y_test),
-                        epochs=10)
-    model.save('modelv6.h5')
+
+    train_gen = batch_generator(X_train, y_train, batch_size)
+
+    steps_per_epoch = len(X_train) // batch_size
+
+    # https://medium.com/analytics-vidhya/train-keras-model-with-large-dataset-batch-training-6b3099fdf366
+    # fit_generator is deprecated so using fit
+    history = model.fit(
+        train_gen,
+        steps_per_epoch=steps_per_epoch,
+        validation_data=(X_test, y_test),
+        epochs=10
+    )
+    model.save('modelv16.h5')
 
 
     plt.figure(figsize=(6, 4))
