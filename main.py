@@ -156,16 +156,14 @@ def preprocess_data():
                 img = cv2.GaussianBlur(img, (3, 3), 0)
                 img = img / 255
                 # processed_img = img
-                augmented_img, augmented_angle = augment_image(img, steering_angles[i])
-                # if img is not None:
-                processed_images.append(augmented_img)
-                valid_steering_angles.append(augmented_angle)
+                if img is not None:
+                    processed_images.append(img)
+                    valid_steering_angles.append(steering_angles[i])
         else:
             print(f"processed image is None for {img_path}")
 
     X = np.array(processed_images)
     y = np.array(valid_steering_angles)
-    
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     print(f"[INFO] Training set shape: {X_train.shape}")
@@ -181,7 +179,7 @@ def preprocess_data():
 
 
 
-def model_training(X_train, X_test, y_train, y_test):
+def model_training(X_train, X_test, y_train, y_test, batch_size=32):
 
     model = Sequential([
         Conv2D(24, (5, 5), strides=(2, 2), activation='relu', input_shape=(66, 200, 3)),
