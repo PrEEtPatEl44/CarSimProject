@@ -21,11 +21,9 @@ The project includes data preprocessing to balance the steering angle distributi
 
 ### Model Training Results
 
-Model loss curve
+Model loss curve (models/modelv16.h5)
 
 ![Model Loss Curve](images/v16.png)
-
-The `modelv16.h5` model achieved stable training with good convergence, as demonstrated in the loss curve above.
 
 ## Setup Environment
 
